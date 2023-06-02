@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 const propTypes = {
   actions: PropTypes.object,
   className: PropTypes.string,
-  seconds: PropTypes.oneOf([5, 10, 30])
+  seconds: PropTypes.number
 };
 
 const defaultProps = {
