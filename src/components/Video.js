@@ -1,10 +1,12 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import ReactHlsPlayer from 'react-hls-player';
 import classNames from 'classnames';
 
 import { isVideoChild, mediaProperties, throttle } from '../utils';
 
 const propTypes = {
+  hlsConfig: PropTypes.object,
   actions: PropTypes.object,
   player: PropTypes.object,
   children: PropTypes.any,
@@ -49,6 +51,7 @@ export default class Video extends Component {
     super(props);
 
     this.video = null; // the html5 video
+    this.hlsConfig = this.play.bind(this);
     this.play = this.play.bind(this);
     this.pause = this.pause.bind(this);
     this.seek = this.seek.bind(this);
@@ -315,9 +318,7 @@ export default class Video extends Component {
   // Fired when the end of the media resource
   // is reached (currentTime == duration)
   handleEnded(...args) {
-    const {
-      loop, player, actions, onEnded
-    } = this.props;
+    const { loop, player, actions, onEnded } = this.props;
     if (loop) {
       this.seek(0);
       this.play();
@@ -499,7 +500,7 @@ export default class Video extends Component {
     // only keep <source />, <track />, <MyComponent isVideoChild /> elements
     return React.Children.toArray(this.props.children)
       .filter(isVideoChild)
-      .map((c) => {
+      .map(c => {
         let cprops;
         if (typeof c.type === 'string') {
           // add onError to <source />
@@ -530,15 +531,17 @@ export default class Video extends Component {
       playsInline,
       muted,
       crossOrigin,
-      videoId
+      videoId,
+      hlsConfig
     } = this.props;
 
     return (
-      <video
+      <ReactHlsPlayer
+        hlsConfig={hlsConfig}
         className={classNames('video-react-video', this.props.className)}
         id={videoId}
         crossOrigin={crossOrigin}
-        ref={(c) => {
+        ref={c => {
           this.video = c;
         }}
         muted={muted}
@@ -573,7 +576,7 @@ export default class Video extends Component {
         tabIndex="-1"
       >
         {this.renderChildren()}
-      </video>
+      </ReactHlsPlayer>
     );
   }
 }
