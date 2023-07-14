@@ -52,7 +52,7 @@ build
 npm-debug.log
 
 /es
-dist
+
 build
 .next
 example/out
