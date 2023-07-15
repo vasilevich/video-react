@@ -541,7 +541,7 @@ export default class Video extends Component {
         className={classNames('video-react-video', this.props.className)}
         id={videoId}
         crossOrigin={crossOrigin}
-        ref={c => {
+        playerRef={c => {
           this.video = c;
         }}
         muted={muted}

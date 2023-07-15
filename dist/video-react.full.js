@@ -26012,7 +26012,7 @@
           className: classnames('video-react-video', this.props.className),
           id: videoId,
           crossOrigin: crossOrigin,
-          ref: function ref(c) {
+          playerRef: function playerRef(c) {
             _this4.video = c;
           },
           muted: muted,
