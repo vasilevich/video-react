@@ -11,7 +11,7 @@ var React = require('react');
 var React__default = _interopDefault(React);
 var classNames = _interopDefault(require('classnames'));
 var redux = require('redux');
-var ReactHlsPlayer = _interopDefault(require('react-hls-player'));
+var Hls = _interopDefault(require('hls.js'));
 
 function _defineProperties(target, props) {
   for (var i = 0; i < props.length; i++) {
@@ -1118,6 +1118,46 @@ var mediaProperties = [
   'poster'
 ];
 
+var HLSSource = /*#__PURE__*/ (function(_Component) {
+  _inheritsLoose(HLSSource, _Component);
+  function HLSSource(props, context) {
+    var _this;
+    _this = _Component.call(this, props, context) || this;
+    _this.hls = new Hls(props.hlsConfig || {});
+    return _this;
+  }
+  var _proto = HLSSource.prototype;
+  _proto.componentDidMount = function componentDidMount() {
+    // `src` is the property get from this component
+    // `video` is the property insert from `Video` component
+    // `video` is the html5 video element
+    var _this$props = this.props,
+      src = _this$props.src,
+      video = _this$props.video;
+    // load hls video source base on hls.js
+    if (Hls.isSupported()) {
+      this.hls.loadSource(src);
+      this.hls.attachMedia(video);
+      this.hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.play();
+      });
+    }
+  };
+  _proto.componentWillUnmount = function componentWillUnmount() {
+    // destroy hls video source
+    if (this.hls) {
+      this.hls.destroy();
+    }
+  };
+  _proto.render = function render() {
+    return /*#__PURE__*/ React__default.createElement('source', {
+      src: this.props.src,
+      type: this.props.type || 'application/x-mpegURL'
+    });
+  };
+  return HLSSource;
+})(React.Component);
+
 var propTypes$3 = {
   hlsConfig: PropTypes.object,
   actions: PropTypes.object,
@@ -1570,12 +1610,20 @@ var Video = /*#__PURE__*/ (function(_Component) {
   // Fires when the browser has loaded
   // the current frame of the audio/video
   _proto.handleLoadedData = function handleLoadedData() {
+    for (
+      var _len = arguments.length, args = new Array(_len), _key = 0;
+      _key < _len;
+      _key++
+    ) {
+      args[_key] = arguments[_key];
+    }
+    console.log(2222, args);
     var _this$props20 = this.props,
       actions = _this$props20.actions,
       onLoadedData = _this$props20.onLoadedData;
     actions.handleLoadedData(this.getProperties());
     if (onLoadedData) {
-      onLoadedData.apply(void 0, arguments);
+      onLoadedData.apply(void 0, args);
     }
   };
 
@@ -1646,7 +1694,13 @@ var Video = /*#__PURE__*/ (function(_Component) {
     if (!this.video) {
       return null;
     }
-
+    if (props.hlsConfig && props.src) {
+      return /*#__PURE__*/ React__default.createElement(HLSSource, {
+        isVideoChild: true,
+        hlsConfig: props.hlsConfig,
+        src: props.src
+      });
+    }
     // only keep <source />, <track />, <MyComponent isVideoChild /> elements
     return React__default.Children.toArray(this.props.children)
       .filter(isVideoChild)
@@ -1684,46 +1738,51 @@ var Video = /*#__PURE__*/ (function(_Component) {
       videoId = _this$props26.videoId,
       hlsConfig = _this$props26.hlsConfig;
     return /*#__PURE__*/ React__default.createElement(
-      ReactHlsPlayer,
-      {
-        hlsConfig: hlsConfig,
-        className: classNames('video-react-video', this.props.className),
-        id: videoId,
-        crossOrigin: crossOrigin,
-        playerRef: function playerRef(c) {
-          _this4.video = c;
+      'video',
+      _extends(
+        {
+          className: classNames('video-react-video', this.props.className),
+          id: videoId,
+          crossOrigin: crossOrigin,
+          ref: function ref(c) {
+            _this4.video = c;
+          },
+          muted: muted,
+          preload: preload,
+          loop: loop,
+          playsInline: playsInline,
+          autoPlay: autoPlay,
+          poster: poster,
+          onLoadStart: this.handleLoadStart,
+          onWaiting: this.handleWaiting,
+          onCanPlay: this.handleCanPlay,
+          onCanPlayThrough: this.handleCanPlayThrough,
+          onPlaying: this.handlePlaying,
+          onEnded: this.handleEnded,
+          onSeeking: this.handleSeeking,
+          onSeeked: this.handleSeeked,
+          onPlay: this.handlePlay,
+          onPause: this.handlePause,
+          onProgress: this.handleProgress,
+          onDurationChange: this.handleDurationChange,
+          onError: this.handleError,
+          onSuspend: this.handleSuspend,
+          onAbort: this.handleAbort,
+          onEmptied: this.handleEmptied,
+          onStalled: this.handleStalled,
+          onLoadedMetadata: this.handleLoadedMetaData,
+          onLoadedData: this.handleLoadedData,
+          onTimeUpdate: this.handleTimeUpdate,
+          onRateChange: this.handleRateChange,
+          onVolumeChange: this.handleVolumeChange,
+          tabIndex: '-1'
         },
-        muted: muted,
-        preload: preload,
-        loop: loop,
-        playsInline: playsInline,
-        autoPlay: autoPlay,
-        poster: poster,
-        src: src,
-        onLoadStart: this.handleLoadStart,
-        onWaiting: this.handleWaiting,
-        onCanPlay: this.handleCanPlay,
-        onCanPlayThrough: this.handleCanPlayThrough,
-        onPlaying: this.handlePlaying,
-        onEnded: this.handleEnded,
-        onSeeking: this.handleSeeking,
-        onSeeked: this.handleSeeked,
-        onPlay: this.handlePlay,
-        onPause: this.handlePause,
-        onProgress: this.handleProgress,
-        onDurationChange: this.handleDurationChange,
-        onError: this.handleError,
-        onSuspend: this.handleSuspend,
-        onAbort: this.handleAbort,
-        onEmptied: this.handleEmptied,
-        onStalled: this.handleStalled,
-        onLoadedMetadata: this.handleLoadedMetaData,
-        onLoadedData: this.handleLoadedData,
-        onTimeUpdate: this.handleTimeUpdate,
-        onRateChange: this.handleRateChange,
-        onVolumeChange: this.handleVolumeChange,
-        tabIndex: '-1'
-      },
+        hlsConfig && src
+          ? {
+              src: src
+            }
+          : {}
+      ),
       this.renderChildren()
     );
   };

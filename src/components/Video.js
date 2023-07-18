@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import ReactHlsPlayer from 'react-hls-player';
 import classNames from 'classnames';
 
 import { isVideoChild, mediaProperties, throttle } from '../utils';
+import HLSSource from './HLSSource';
 
 const propTypes = {
   hlsConfig: PropTypes.object,
@@ -425,6 +425,7 @@ export default class Video extends Component {
   // Fires when the browser has loaded
   // the current frame of the audio/video
   handleLoadedData(...args) {
+    console.log(2222, args);
     const { actions, onLoadedData } = this.props;
     actions.handleLoadedData(this.getProperties());
 
@@ -496,7 +497,11 @@ export default class Video extends Component {
     if (!this.video) {
       return null;
     }
-
+    if (props.hlsConfig && props.src) {
+      return (
+        <HLSSource isVideoChild hlsConfig={props.hlsConfig} src={props.src} />
+      );
+    }
     // only keep <source />, <track />, <MyComponent isVideoChild /> elements
     return React.Children.toArray(this.props.children)
       .filter(isVideoChild)
@@ -536,12 +541,11 @@ export default class Video extends Component {
     } = this.props;
 
     return (
-      <ReactHlsPlayer
-        hlsConfig={hlsConfig}
+      <video
         className={classNames('video-react-video', this.props.className)}
         id={videoId}
         crossOrigin={crossOrigin}
-        playerRef={c => {
+        ref={c => {
           this.video = c;
         }}
         muted={muted}
@@ -550,7 +554,6 @@ export default class Video extends Component {
         playsInline={playsInline}
         autoPlay={autoPlay}
         poster={poster}
-        src={src}
         onLoadStart={this.handleLoadStart}
         onWaiting={this.handleWaiting}
         onCanPlay={this.handleCanPlay}
@@ -574,9 +577,10 @@ export default class Video extends Component {
         onRateChange={this.handleRateChange}
         onVolumeChange={this.handleVolumeChange}
         tabIndex="-1"
+        {...(hlsConfig && src ? { src } : {})}
       >
         {this.renderChildren()}
-      </ReactHlsPlayer>
+      </video>
     );
   }
 }
