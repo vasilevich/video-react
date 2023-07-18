@@ -4850,6 +4850,7 @@ export {
   DurationDisplay,
   ForwardControl,
   FullscreenToggle,
+  HLSSource,
   LoadProgressBar,
   LoadingSpinner,
   MenuButton,

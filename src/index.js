@@ -28,6 +28,7 @@ import DurationDisplay from './components/time-controls/DurationDisplay';
 import TimeDivider from './components/time-controls/TimeDivider';
 
 import MenuButton from './components/menu/MenuButton';
+import HLSSource from './components/HLSSource';
 
 import * as playerActions from './actions/player';
 import * as videoActions from './actions/video';
@@ -64,5 +65,6 @@ export {
   playerActions,
   videoActions,
   playerReducer,
-  operationReducer
+  operationReducer,
+  HLSSource
 };

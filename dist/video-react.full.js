@@ -36396,6 +36396,7 @@
   exports.DurationDisplay = DurationDisplay;
   exports.ForwardControl = ForwardControl;
   exports.FullscreenToggle = FullscreenToggle;
+  exports.HLSSource = HLSSource;
   exports.LoadProgressBar = LoadProgressBar;
   exports.LoadingSpinner = LoadingSpinner;
   exports.MenuButton = MenuButton;
