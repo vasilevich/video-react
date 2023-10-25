@@ -425,7 +425,6 @@ export default class Video extends Component {
   // Fires when the browser has loaded
   // the current frame of the audio/video
   handleLoadedData(...args) {
-    console.log(2222, args);
     const { actions, onLoadedData } = this.props;
     actions.handleLoadedData(this.getProperties());
 
