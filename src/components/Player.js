@@ -30,6 +30,9 @@ const propTypes = {
   videoId: PropTypes.string,
 
   startTime: PropTypes.number,
+  endTime: PropTypes.number,
+  markedTimes: PropTypes.arrayOf(PropTypes.number),
+
   loop: PropTypes.bool,
   autoPlay: PropTypes.bool,
   src: PropTypes.string,
@@ -100,6 +103,18 @@ export default class Player extends Component {
     window.addEventListener('resize', this.handleResize);
 
     fullscreen.addEventListener(this.handleFullScreenChange);
+
+    this.setPlayerProps();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (
+      prevProps.startTime !== this.props.startTime ||
+      prevProps.endTime !== this.props.endTime ||
+      prevProps.markedTimes !== this.props.markedTimes
+    ) {
+      this.setPlayerProps();
+    }
   }
 
   componentWillUnmount() {
@@ -108,6 +123,19 @@ export default class Player extends Component {
     fullscreen.removeEventListener(this.handleFullScreenChange);
     if (this.controlsHideTimer) {
       window.clearTimeout(this.controlsHideTimer);
+    }
+  }
+
+  setPlayerProps() {
+    const { startTime, endTime, markedTimes } = this.props;
+    if (startTime !== undefined) {
+      this.actions.setStartTime(startTime);
+    }
+    if (endTime !== undefined) {
+      this.actions.setEndTime(endTime);
+    }
+    if (markedTimes !== undefined) {
+      this.actions.setMarkedTimes(markedTimes);
     }
   }
 

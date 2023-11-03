@@ -16,6 +16,9 @@ declare module 'video-react' {
     videoId?: string;
 
     startTime?: number;
+    endTime?: number;
+    markedTimes?: Array<number>;
+
     loop?: boolean;
     autoPlay?: boolean;
     src?: string;

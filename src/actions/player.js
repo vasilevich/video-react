@@ -4,7 +4,9 @@ export const OPERATE = 'video-react/OPERATE';
 export const FULLSCREEN_CHANGE = 'video-react/FULLSCREEN_CHANGE';
 export const PLAYER_ACTIVATE = 'video-react/PLAYER_ACTIVATE';
 export const USER_ACTIVATE = 'video-react/USER_ACTIVATE';
-
+export const SET_START_TIME = 'SET_START_TIME';
+export const SET_END_TIME = 'SET_END_TIME';
+export const SET_MARKED_TIMES = 'SET_MARKED_TIMES';
 export function handleFullscreenChange(isFullscreen) {
   return {
     type: FULLSCREEN_CHANGE,
@@ -187,5 +189,26 @@ export function toggleFullscreen(player) {
   return {
     type: FULLSCREEN_CHANGE,
     isFullscreen: !player.isFullscreen
+  };
+}
+
+export function setStartTime(startTime) {
+  return {
+    type: SET_START_TIME,
+    startTime
+  };
+}
+
+export function setEndTime(endTime) {
+  return {
+    type: SET_END_TIME,
+    endTime
+  };
+}
+
+export function setMarkedTimes(markedTimes) {
+  return {
+    type: SET_MARKED_TIMES,
+    markedTimes
   };
 }

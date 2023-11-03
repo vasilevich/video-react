@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 
 import { isVideoChild, mediaProperties, throttle } from '../utils';
+import { getEffectiveDuration, getEffectiveTime } from '../utils/converters';
 import HLSSource from './HLSSource';
 
 const propTypes = {
@@ -148,6 +149,14 @@ export default class Video extends Component {
   // video height
   get videoHeight() {
     return this.video.videoHeight;
+  }
+
+  getEffectiveDuration = () => {
+    return getEffectiveDuration(this.props);
+  };
+
+  getEffectiveTime() {
+    return getEffectiveTime(this.props);
   }
 
   handleTextTrackChange() {
@@ -441,6 +450,17 @@ export default class Video extends Component {
 
     if (onTimeUpdate) {
       onTimeUpdate(...args);
+    }
+    const { startTime, endTime } = this.props.player;
+    if (startTime !== undefined) {
+      if (this.video.currentTime < startTime) {
+        this.seek(startTime);
+      }
+    }
+    if (endTime !== undefined) {
+      if (this.getEffectiveTime() > this.getEffectiveDuration()) {
+        this.handleEnded(...args);
+      }
     }
   }
 

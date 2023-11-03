@@ -7,6 +7,7 @@ import PlayProgressBar from './PlayProgressBar';
 import LoadProgressBar from './LoadProgressBar';
 import MouseTimeDisplay from './MouseTimeDisplay';
 import { formatTime } from '../../utils';
+import MarkProgressBar from './MarkProgressBar';
 
 const propTypes = {
   player: PropTypes.object,
@@ -33,28 +34,36 @@ export default class SeekBar extends Component {
 
   componentDidUpdate() {}
 
-  /**
-   * Get percentage of video played
-   *
-   * @return {Number} Percentage played
-   * @method getPercent
-   */
-  getPercent() {
-    const { currentTime, seekingTime, duration } = this.props.player;
+  getEffectiveDuration() {
+    const { duration, endTime, startTime } = this.props.player;
+    return (endTime || duration) - (startTime || 0);
+  }
+
+  getEffectiveTime() {
+    const { currentTime, seekingTime, startTime } = this.props.player;
     const time = seekingTime || currentTime;
-    const percent = time / duration;
+    return time - (startTime || 0);
+  }
+
+  getPercent() {
+    const percent = this.getEffectiveTime() / this.getEffectiveDuration();
     return percent >= 1 ? 1 : percent;
   }
 
   getNewTime(event) {
-    const {
-      player: { duration }
-    } = this.props;
     const distance = this.slider.calculateDistance(event);
-    const newTime = distance * duration;
+    return (
+      distance * this.getEffectiveDuration() +
+      (this.props.player.startTime || 0)
+    );
+  }
 
-    // Don't let video end while scrubbing.
-    return newTime === duration ? newTime - 0.1 : newTime;
+  getMarkedTimes() {
+    const { markedTimes } = this.props.player;
+    if (Array.isArray(markedTimes)) {
+      return markedTimes;
+    }
+    return [];
   }
 
   handleMouseDown() {}
@@ -85,11 +94,12 @@ export default class SeekBar extends Component {
 
   render() {
     const {
-      player: { currentTime, seekingTime, duration, buffered },
+      player: { buffered },
       mouseTime
     } = this.props;
-    const time = seekingTime || currentTime;
-
+    // const time = seekingTime || currentTime;
+    const duration = this.getEffectiveDuration();
+    const time = this.getEffectiveTime();
     return (
       <Slider
         ref={input => {
@@ -116,6 +126,10 @@ export default class SeekBar extends Component {
         />
         <MouseTimeDisplay duration={duration} mouseTime={mouseTime} />
         <PlayProgressBar currentTime={time} duration={duration} />
+        <MarkProgressBar
+          markedTimes={this.getMarkedTimes()}
+          duration={duration}
+        />
       </Slider>
     );
   }

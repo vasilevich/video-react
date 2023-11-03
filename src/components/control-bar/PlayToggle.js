@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import { getEffectiveDuration, getEffectiveTime } from '../../utils/converters';
 
 const propTypes = {
   actions: PropTypes.object,
@@ -17,6 +18,9 @@ export default class PlayToggle extends Component {
   handleClick() {
     const { actions, player } = this.props;
     if (player.paused) {
+      if (getEffectiveTime(this.props) >= getEffectiveDuration(this.props)) {
+        actions.seek(0);
+      }
       actions.play();
     } else {
       actions.pause();
@@ -29,7 +33,7 @@ export default class PlayToggle extends Component {
 
     return (
       <button
-        ref={(c) => {
+        ref={c => {
           this.button = c;
         }}
         className={classNames(className, {

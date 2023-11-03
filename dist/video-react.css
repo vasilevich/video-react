@@ -902,6 +902,29 @@ body.video-react-full-window .video-react-fullscreen {
   background-color: rgba(0, 0, 0, 0.8);
 }
 
+.video-react
+  .video-react-progress-control.video-react-control
+  .video-react-play-progress-mark-container {
+  width: 100%;
+  position: absolute;
+  z-index: 99999;
+  height: 6px;
+  top: -1px;
+}
+
+.video-react
+  .video-react-progress-control.video-react-control
+  .video-react-play-progress-mark-container
+  > .video-react-play-progress-mark-container {
+  position: absolute;
+  left: 33.3333%;
+  top: -1px;
+  width: 3px;
+  height: 7px;
+  border-radius: 5px;
+  background-color: red;
+}
+
 .video-react .video-react-play-control {
   cursor: pointer;
   -webkit-box-flex: none;

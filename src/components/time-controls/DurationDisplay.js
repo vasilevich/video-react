@@ -3,18 +3,20 @@ import React from 'react';
 import classNames from 'classnames';
 
 import { formatTime } from '../../utils';
+import { getEffectiveDuration } from '../../utils/converters';
 
 const propTypes = {
   player: PropTypes.object,
   className: PropTypes.string
 };
 
-function DurationDisplay({ player: { duration }, className }) {
+function DurationDisplay(props) {
+  const duration = getEffectiveDuration(props);
   const formattedTime = formatTime(duration);
   return (
     <div
       className={classNames(
-        className,
+        props.className,
         'video-react-duration video-react-time-control video-react-control'
       )}
     >

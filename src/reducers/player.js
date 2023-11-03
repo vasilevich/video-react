@@ -29,6 +29,9 @@ import {
 import {
   FULLSCREEN_CHANGE,
   PLAYER_ACTIVATE,
+  SET_END_TIME,
+  SET_MARKED_TIMES,
+  SET_START_TIME,
   USER_ACTIVATE
 } from '../actions/player';
 
@@ -54,7 +57,10 @@ const initialState = {
   userActivity: true,
   isActive: false,
   isFullscreen: false,
-  activeTextTrack: null
+  activeTextTrack: null,
+  markedTimes: undefined,
+  startTime: undefined,
+  endTime: undefined
 };
 
 export default function player(state = initialState, action) {
@@ -151,6 +157,24 @@ export default function player(state = initialState, action) {
         error: 'UNKNOWN ERROR',
         ended: true
       };
+    case SET_START_TIME:
+      return {
+        ...state,
+        startTime: action.startTime
+      };
+
+    case SET_END_TIME:
+      return {
+        ...state,
+        endTime: action.endTime
+      };
+
+    case SET_MARKED_TIMES:
+      return {
+        ...state,
+        markedTimes: action.markedTimes
+      };
+
     case DURATION_CHANGE:
     case TIME_UPDATE:
     case VOLUME_CHANGE:
