@@ -4369,6 +4369,7 @@ var propTypes$u = {
   startTime: PropTypes.number,
   endTime: PropTypes.number,
   markedTimes: PropTypes.arrayOf(PropTypes.number),
+  playbackRate: PropTypes.number,
   loop: PropTypes.bool,
   autoPlay: PropTypes.bool,
   src: PropTypes.string,
@@ -4468,7 +4469,8 @@ var Player = /*#__PURE__*/ (function(_Component) {
     var _this$props = this.props,
       startTime = _this$props.startTime,
       endTime = _this$props.endTime,
-      markedTimes = _this$props.markedTimes;
+      markedTimes = _this$props.markedTimes,
+      playbackRate = _this$props.playbackRate;
     if (startTime !== undefined) {
       this.actions.setStartTime(startTime);
     }
@@ -4477,6 +4479,9 @@ var Player = /*#__PURE__*/ (function(_Component) {
     }
     if (markedTimes !== undefined) {
       this.actions.setMarkedTimes(markedTimes);
+    }
+    if (playbackRate !== undefined) {
+      this.actions.changeRate(playbackRate);
     }
   };
   _proto.getDefaultChildren = function getDefaultChildren(originalChildren) {

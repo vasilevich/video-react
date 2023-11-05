@@ -35900,6 +35900,7 @@
     startTime: propTypes.number,
     endTime: propTypes.number,
     markedTimes: propTypes.arrayOf(propTypes.number),
+    playbackRate: propTypes.number,
     loop: propTypes.bool,
     autoPlay: propTypes.bool,
     src: propTypes.string,
@@ -36001,7 +36002,8 @@
       var _this$props = this.props,
         startTime = _this$props.startTime,
         endTime = _this$props.endTime,
-        markedTimes = _this$props.markedTimes;
+        markedTimes = _this$props.markedTimes,
+        playbackRate = _this$props.playbackRate;
       if (startTime !== undefined) {
         this.actions.setStartTime(startTime);
       }
@@ -36010,6 +36012,9 @@
       }
       if (markedTimes !== undefined) {
         this.actions.setMarkedTimes(markedTimes);
+      }
+      if (playbackRate !== undefined) {
+        this.actions.changeRate(playbackRate);
       }
     };
     _proto.getDefaultChildren = function getDefaultChildren(originalChildren) {
