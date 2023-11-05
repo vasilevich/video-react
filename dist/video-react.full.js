@@ -36015,6 +36015,7 @@
       }
       if (playbackRate !== undefined) {
         this.actions.changeRate(playbackRate);
+        this.playbackRate(playbackRate);
       }
     };
     _proto.getDefaultChildren = function getDefaultChildren(originalChildren) {

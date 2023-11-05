@@ -4482,6 +4482,7 @@ var Player = /*#__PURE__*/ (function(_Component) {
     }
     if (playbackRate !== undefined) {
       this.actions.changeRate(playbackRate);
+      this.playbackRate(playbackRate);
     }
   };
   _proto.getDefaultChildren = function getDefaultChildren(originalChildren) {

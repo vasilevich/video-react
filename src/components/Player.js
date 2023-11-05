@@ -139,6 +139,7 @@ export default class Player extends Component {
     }
     if (playbackRate !== undefined) {
       this.actions.changeRate(playbackRate);
+      this.playbackRate(playbackRate);
     }
   }
 
