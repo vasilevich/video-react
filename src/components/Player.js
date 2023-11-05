@@ -32,7 +32,7 @@ const propTypes = {
   startTime: PropTypes.number,
   endTime: PropTypes.number,
   markedTimes: PropTypes.arrayOf(PropTypes.number),
-
+  playbackRate: PropTypes.number,
   loop: PropTypes.bool,
   autoPlay: PropTypes.bool,
   src: PropTypes.string,
@@ -127,7 +127,7 @@ export default class Player extends Component {
   }
 
   setPlayerProps() {
-    const { startTime, endTime, markedTimes } = this.props;
+    const { startTime, endTime, markedTimes, playbackRate } = this.props;
     if (startTime !== undefined) {
       this.actions.setStartTime(startTime);
     }
@@ -136,6 +136,9 @@ export default class Player extends Component {
     }
     if (markedTimes !== undefined) {
       this.actions.setMarkedTimes(markedTimes);
+    }
+    if (playbackRate !== undefined) {
+      this.actions.changeRate(playbackRate);
     }
   }
 

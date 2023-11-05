@@ -18,6 +18,7 @@ declare module 'video-react' {
     startTime?: number;
     endTime?: number;
     markedTimes?: Array<number>;
+    playbackRate?: number;
 
     loop?: boolean;
     autoPlay?: boolean;
@@ -127,6 +128,9 @@ declare module 'video-react' {
     player?: object;
     children?: any;
     startTime?: number;
+    endTime?: number;
+    markedTimes?: Array<number>;
+    playbackRate?: number;
     loop?: boolean;
     muted?: boolean;
     autoPlay?: boolean;
