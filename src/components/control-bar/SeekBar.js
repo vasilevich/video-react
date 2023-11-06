@@ -8,6 +8,7 @@ import LoadProgressBar from './LoadProgressBar';
 import MouseTimeDisplay from './MouseTimeDisplay';
 import { formatTime } from '../../utils';
 import MarkProgressBar from './MarkProgressBar';
+import { getEffectiveDuration, getEffectiveTime } from '../../utils/converters';
 
 const propTypes = {
   player: PropTypes.object,
@@ -35,14 +36,11 @@ export default class SeekBar extends Component {
   componentDidUpdate() {}
 
   getEffectiveDuration() {
-    const { duration, endTime, startTime } = this.props.player;
-    return (endTime || duration) - (startTime || 0);
+    return getEffectiveDuration(this.props);
   }
 
   getEffectiveTime() {
-    const { currentTime, seekingTime, startTime } = this.props.player;
-    const time = seekingTime || currentTime;
-    return time - (startTime || 0);
+    return getEffectiveTime(this.props);
   }
 
   getPercent() {

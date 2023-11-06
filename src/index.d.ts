@@ -15,6 +15,7 @@ declare module 'video-react' {
     className?: string;
     videoId?: string;
 
+    time?: number;
     startTime?: number;
     endTime?: number;
     markedTimes?: Array<number>;

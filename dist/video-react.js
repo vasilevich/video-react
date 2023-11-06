@@ -940,6 +940,7 @@
   var SET_START_TIME = 'SET_START_TIME';
   var SET_END_TIME = 'SET_END_TIME';
   var SET_MARKED_TIMES = 'SET_MARKED_TIMES';
+  var SET_PLAYBACK_RATE = 'SET_PLAYBACK_RATE';
   function handleFullscreenChange(isFullscreen) {
     return {
       type: FULLSCREEN_CHANGE,
@@ -1126,6 +1127,12 @@
       markedTimes: markedTimes
     };
   }
+  function setPlaybackRate(playbackRate) {
+    return {
+      type: SET_PLAYBACK_RATE,
+      playbackRate: playbackRate
+    };
+  }
 
   var playerActions = /*#__PURE__*/ Object.freeze({
     __proto__: null,
@@ -1136,6 +1143,7 @@
     SET_START_TIME: SET_START_TIME,
     SET_END_TIME: SET_END_TIME,
     SET_MARKED_TIMES: SET_MARKED_TIMES,
+    SET_PLAYBACK_RATE: SET_PLAYBACK_RATE,
     handleFullscreenChange: handleFullscreenChange,
     activate: activate,
     userActivate: userActivate,
@@ -1151,7 +1159,8 @@
     toggleFullscreen: toggleFullscreen,
     setStartTime: setStartTime,
     setEndTime: setEndTime,
-    setMarkedTimes: setMarkedTimes
+    setMarkedTimes: setMarkedTimes,
+    setPlaybackRate: setPlaybackRate
   });
 
   var initialState = {
@@ -1255,7 +1264,7 @@
         });
       case SET_START_TIME:
         return _extends({}, state, {
-          startTime: action.startTime
+          startTime: Math.max(action.startTime, 0)
         });
       case SET_END_TIME:
         return _extends({}, state, {
@@ -1264,6 +1273,10 @@
       case SET_MARKED_TIMES:
         return _extends({}, state, {
           markedTimes: action.markedTimes
+        });
+      case SET_PLAYBACK_RATE:
+        return _extends({}, state, {
+          playbackRate: action.playbackRate
         });
       case DURATION_CHANGE:
       case TIME_UPDATE:
@@ -34089,20 +34102,11 @@
     var _proto = SeekBar.prototype;
     _proto.componentDidMount = function componentDidMount() {};
     _proto.componentDidUpdate = function componentDidUpdate() {};
-    _proto.getEffectiveDuration = function getEffectiveDuration() {
-      var _this$props$player = this.props.player,
-        duration = _this$props$player.duration,
-        endTime = _this$props$player.endTime,
-        startTime = _this$props$player.startTime;
-      return (endTime || duration) - (startTime || 0);
+    _proto.getEffectiveDuration = function getEffectiveDuration$1() {
+      return getEffectiveDuration(this.props);
     };
-    _proto.getEffectiveTime = function getEffectiveTime() {
-      var _this$props$player2 = this.props.player,
-        currentTime = _this$props$player2.currentTime,
-        seekingTime = _this$props$player2.seekingTime,
-        startTime = _this$props$player2.startTime;
-      var time = seekingTime || currentTime;
-      return time - (startTime || 0);
+    _proto.getEffectiveTime = function getEffectiveTime$1() {
+      return getEffectiveTime(this.props);
     };
     _proto.getPercent = function getPercent() {
       var percent = this.getEffectiveTime() / this.getEffectiveDuration();
@@ -35576,6 +35580,7 @@
     aspectRatio: propTypes.string,
     className: propTypes.string,
     videoId: propTypes.string,
+    time: propTypes.number,
     startTime: propTypes.number,
     endTime: propTypes.number,
     markedTimes: propTypes.arrayOf(propTypes.number),
@@ -35680,9 +35685,13 @@
     _proto.setPlayerProps = function setPlayerProps() {
       var _this$props = this.props,
         startTime = _this$props.startTime,
+        time = _this$props.time,
         endTime = _this$props.endTime,
         markedTimes = _this$props.markedTimes,
         playbackRate = _this$props.playbackRate;
+      if (time !== undefined) {
+        this.seek(time);
+      }
       if (startTime !== undefined) {
         this.actions.setStartTime(startTime);
       }
@@ -35693,8 +35702,9 @@
         this.actions.setMarkedTimes(markedTimes);
       }
       if (playbackRate !== undefined) {
+        this.video.playbackRate = playbackRate;
         this.actions.changeRate(playbackRate);
-        this.playbackRate(playbackRate);
+        this.actions.setPlaybackRate(playbackRate);
       }
     };
     _proto.getDefaultChildren = function getDefaultChildren(originalChildren) {

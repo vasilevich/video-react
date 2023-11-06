@@ -7,6 +7,7 @@ export const USER_ACTIVATE = 'video-react/USER_ACTIVATE';
 export const SET_START_TIME = 'SET_START_TIME';
 export const SET_END_TIME = 'SET_END_TIME';
 export const SET_MARKED_TIMES = 'SET_MARKED_TIMES';
+export const SET_PLAYBACK_RATE = 'SET_PLAYBACK_RATE';
 export function handleFullscreenChange(isFullscreen) {
   return {
     type: FULLSCREEN_CHANGE,
@@ -210,5 +211,12 @@ export function setMarkedTimes(markedTimes) {
   return {
     type: SET_MARKED_TIMES,
     markedTimes
+  };
+}
+
+export function setPlaybackRate(playbackRate) {
+  return {
+    type: SET_PLAYBACK_RATE,
+    playbackRate
   };
 }

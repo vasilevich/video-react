@@ -397,6 +397,7 @@ var USER_ACTIVATE = 'video-react/USER_ACTIVATE';
 var SET_START_TIME = 'SET_START_TIME';
 var SET_END_TIME = 'SET_END_TIME';
 var SET_MARKED_TIMES = 'SET_MARKED_TIMES';
+var SET_PLAYBACK_RATE = 'SET_PLAYBACK_RATE';
 function handleFullscreenChange(isFullscreen) {
   return {
     type: FULLSCREEN_CHANGE,
@@ -583,6 +584,12 @@ function setMarkedTimes(markedTimes) {
     markedTimes: markedTimes
   };
 }
+function setPlaybackRate(playbackRate) {
+  return {
+    type: SET_PLAYBACK_RATE,
+    playbackRate: playbackRate
+  };
+}
 
 var playerActions = /*#__PURE__*/ Object.freeze({
   __proto__: null,
@@ -593,6 +600,7 @@ var playerActions = /*#__PURE__*/ Object.freeze({
   SET_START_TIME: SET_START_TIME,
   SET_END_TIME: SET_END_TIME,
   SET_MARKED_TIMES: SET_MARKED_TIMES,
+  SET_PLAYBACK_RATE: SET_PLAYBACK_RATE,
   handleFullscreenChange: handleFullscreenChange,
   activate: activate,
   userActivate: userActivate,
@@ -608,7 +616,8 @@ var playerActions = /*#__PURE__*/ Object.freeze({
   toggleFullscreen: toggleFullscreen,
   setStartTime: setStartTime,
   setEndTime: setEndTime,
-  setMarkedTimes: setMarkedTimes
+  setMarkedTimes: setMarkedTimes,
+  setPlaybackRate: setPlaybackRate
 });
 
 var initialState = {
@@ -712,7 +721,7 @@ function player(state, action) {
       });
     case SET_START_TIME:
       return _extends({}, state, {
-        startTime: action.startTime
+        startTime: Math.max(action.startTime, 0)
       });
     case SET_END_TIME:
       return _extends({}, state, {
@@ -721,6 +730,10 @@ function player(state, action) {
     case SET_MARKED_TIMES:
       return _extends({}, state, {
         markedTimes: action.markedTimes
+      });
+    case SET_PLAYBACK_RATE:
+      return _extends({}, state, {
+        playbackRate: action.playbackRate
       });
     case DURATION_CHANGE:
     case TIME_UPDATE:
@@ -2878,20 +2891,11 @@ var SeekBar = /*#__PURE__*/ (function(_Component) {
   var _proto = SeekBar.prototype;
   _proto.componentDidMount = function componentDidMount() {};
   _proto.componentDidUpdate = function componentDidUpdate() {};
-  _proto.getEffectiveDuration = function getEffectiveDuration() {
-    var _this$props$player = this.props.player,
-      duration = _this$props$player.duration,
-      endTime = _this$props$player.endTime,
-      startTime = _this$props$player.startTime;
-    return (endTime || duration) - (startTime || 0);
+  _proto.getEffectiveDuration = function getEffectiveDuration$1() {
+    return getEffectiveDuration(this.props);
   };
-  _proto.getEffectiveTime = function getEffectiveTime() {
-    var _this$props$player2 = this.props.player,
-      currentTime = _this$props$player2.currentTime,
-      seekingTime = _this$props$player2.seekingTime,
-      startTime = _this$props$player2.startTime;
-    var time = seekingTime || currentTime;
-    return time - (startTime || 0);
+  _proto.getEffectiveTime = function getEffectiveTime$1() {
+    return getEffectiveTime(this.props);
   };
   _proto.getPercent = function getPercent() {
     var percent = this.getEffectiveTime() / this.getEffectiveDuration();
@@ -4357,6 +4361,7 @@ var propTypes$u = {
   aspectRatio: PropTypes.string,
   className: PropTypes.string,
   videoId: PropTypes.string,
+  time: PropTypes.number,
   startTime: PropTypes.number,
   endTime: PropTypes.number,
   markedTimes: PropTypes.arrayOf(PropTypes.number),
@@ -4459,9 +4464,13 @@ var Player = /*#__PURE__*/ (function(_Component) {
   _proto.setPlayerProps = function setPlayerProps() {
     var _this$props = this.props,
       startTime = _this$props.startTime,
+      time = _this$props.time,
       endTime = _this$props.endTime,
       markedTimes = _this$props.markedTimes,
       playbackRate = _this$props.playbackRate;
+    if (time !== undefined) {
+      this.seek(time);
+    }
     if (startTime !== undefined) {
       this.actions.setStartTime(startTime);
     }
@@ -4472,8 +4481,9 @@ var Player = /*#__PURE__*/ (function(_Component) {
       this.actions.setMarkedTimes(markedTimes);
     }
     if (playbackRate !== undefined) {
+      this.video.playbackRate = playbackRate;
       this.actions.changeRate(playbackRate);
-      this.playbackRate(playbackRate);
+      this.actions.setPlaybackRate(playbackRate);
     }
   };
   _proto.getDefaultChildren = function getDefaultChildren(originalChildren) {

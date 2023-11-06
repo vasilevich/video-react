@@ -28,7 +28,7 @@ const propTypes = {
   aspectRatio: PropTypes.string,
   className: PropTypes.string,
   videoId: PropTypes.string,
-
+  time: PropTypes.number,
   startTime: PropTypes.number,
   endTime: PropTypes.number,
   markedTimes: PropTypes.arrayOf(PropTypes.number),
@@ -127,7 +127,10 @@ export default class Player extends Component {
   }
 
   setPlayerProps() {
-    const { startTime, endTime, markedTimes, playbackRate } = this.props;
+    const { startTime, time, endTime, markedTimes, playbackRate } = this.props;
+    if (time !== undefined) {
+      this.seek(time);
+    }
     if (startTime !== undefined) {
       this.actions.setStartTime(startTime);
     }
@@ -138,8 +141,9 @@ export default class Player extends Component {
       this.actions.setMarkedTimes(markedTimes);
     }
     if (playbackRate !== undefined) {
+      this.video.playbackRate = playbackRate;
       this.actions.changeRate(playbackRate);
-      this.playbackRate(playbackRate);
+      this.actions.setPlaybackRate(playbackRate);
     }
   }
 

@@ -31,6 +31,7 @@ import {
   PLAYER_ACTIVATE,
   SET_END_TIME,
   SET_MARKED_TIMES,
+  SET_PLAYBACK_RATE,
   SET_START_TIME,
   USER_ACTIVATE
 } from '../actions/player';
@@ -160,7 +161,7 @@ export default function player(state = initialState, action) {
     case SET_START_TIME:
       return {
         ...state,
-        startTime: action.startTime
+        startTime: Math.max(action.startTime, 0)
       };
 
     case SET_END_TIME:
@@ -174,7 +175,11 @@ export default function player(state = initialState, action) {
         ...state,
         markedTimes: action.markedTimes
       };
-
+    case SET_PLAYBACK_RATE:
+      return {
+        ...state,
+        playbackRate: action.playbackRate
+      };
     case DURATION_CHANGE:
     case TIME_UPDATE:
     case VOLUME_CHANGE:
