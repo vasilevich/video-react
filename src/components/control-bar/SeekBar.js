@@ -8,7 +8,12 @@ import LoadProgressBar from './LoadProgressBar';
 import MouseTimeDisplay from './MouseTimeDisplay';
 import { formatTime } from '../../utils';
 import MarkProgressBar from './MarkProgressBar';
-import { getEffectiveDuration, getEffectiveTime } from '../../utils/converters';
+import {
+  convertToEffectiveTime,
+  getEffectiveDuration,
+  getEffectiveTime,
+  getRealDuration
+} from '../../utils/converters';
 
 const propTypes = {
   player: PropTypes.object,
@@ -39,12 +44,17 @@ export default class SeekBar extends Component {
     return getEffectiveDuration(this.props);
   }
 
+  getRealDuration() {
+    return getRealDuration(this.props);
+  }
+
   getEffectiveTime() {
     return getEffectiveTime(this.props);
   }
 
   getPercent() {
     const percent = this.getEffectiveTime() / this.getEffectiveDuration();
+    //  console.log(111111, this.getEffectiveTime(), this.getEffectiveDuration(), percent);
     return percent >= 1 ? 1 : percent;
   }
 
@@ -57,11 +67,16 @@ export default class SeekBar extends Component {
   }
 
   getMarkedTimes() {
-    const { markedTimes } = this.props.player;
-    if (Array.isArray(markedTimes)) {
-      return markedTimes;
-    }
-    return [];
+    return this.props.player.markedTimes || [];
+  }
+
+  getMarkedTimesPercentages() {
+    const t = this.getMarkedTimes()
+      .map(time => convertToEffectiveTime(time))
+      .map(effectiveTime => effectiveTime / this.getEffectiveDuration());
+    //  console.log(222222,this.getMarkedTimes() , t);
+
+    return t;
   }
 
   handleMouseDown() {}
@@ -125,8 +140,7 @@ export default class SeekBar extends Component {
         <MouseTimeDisplay duration={duration} mouseTime={mouseTime} />
         <PlayProgressBar currentTime={time} duration={duration} />
         <MarkProgressBar
-          markedTimes={this.getMarkedTimes()}
-          duration={duration}
+          markedTimesPercentages={this.getMarkedTimesPercentages()}
         />
       </Slider>
     );

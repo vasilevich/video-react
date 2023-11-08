@@ -129,7 +129,9 @@ export default class Player extends Component {
   setPlayerProps() {
     const { startTime, time, endTime, markedTimes, playbackRate } = this.props;
     if (time !== undefined) {
-      this.seek(time);
+      setTimeout(() => {
+        this.seek(time);
+      }, 1000);
     }
     if (startTime !== undefined) {
       this.actions.setStartTime(startTime);

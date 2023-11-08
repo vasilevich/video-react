@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { Component, useMemo } from 'react';
 import classNames from 'classnames';
 import { createStore } from 'redux';
 import Hls from 'hls.js';
@@ -1171,13 +1171,20 @@ var getEffectiveDuration = function getEffectiveDuration(props) {
     startTime = _props$player.startTime;
   return (endTime || duration) - (startTime || 0);
 };
+var getRealDuration = function getRealDuration(props) {
+  var duration = props.player.duration;
+  return duration;
+};
+var convertToEffectiveTime = function convertToEffectiveTime(time, startTime) {
+  return time - (startTime || 0);
+};
 var getEffectiveTime = function getEffectiveTime(props) {
   var _props$player2 = props.player,
     currentTime = _props$player2.currentTime,
     seekingTime = _props$player2.seekingTime,
     startTime = _props$player2.startTime;
   var time = seekingTime || currentTime;
-  return time - (startTime || 0);
+  return convertToEffectiveTime(time, startTime);
 };
 
 var HLSSource = /*#__PURE__*/ (function(_Component) {
@@ -2819,50 +2826,54 @@ MouseTimeDisplay.propTypes = {
 };
 MouseTimeDisplay.displayName = 'MouseTimeDisplay';
 
-var propTypes$9 = {
-  markedTimes: PropTypes.arrayOf(PropTypes.number),
-  duration: PropTypes.number,
-  percentage: PropTypes.string,
+var Mark = /*#__PURE__*/ React.memo(function(_ref) {
+  var timePercentage = _ref.timePercentage;
+  var percent = timePercentage * 100;
+  return /*#__PURE__*/ React.createElement('span', {
+    className: 'video-react-play-progress-mark-container',
+    'data-time': percent,
+    'data-percent': percent,
+    style: {
+      left: percent + '%'
+    }
+  });
+});
+Mark.propTypes = {
+  timePercentage: PropTypes.number.isRequired
+};
+var MarkProgressBar = function MarkProgressBar(_ref2) {
+  var markedTimesPercentages = _ref2.markedTimesPercentages,
+    className = _ref2.className;
+  var marks = useMemo(
+    function() {
+      return markedTimesPercentages.map(function(timePercentage) {
+        return /*#__PURE__*/ React.createElement(Mark, {
+          key: timePercentage,
+          timePercentage: timePercentage
+        });
+      });
+    },
+    [markedTimesPercentages]
+  );
+  return /*#__PURE__*/ React.createElement(
+    'div',
+    {
+      className: classNames(
+        'video-react-play-progress-mark-container',
+        className
+      )
+    },
+    marks
+  );
+};
+MarkProgressBar.propTypes = {
+  markedTimesPercentages: PropTypes.arrayOf(PropTypes.number.isRequired),
   className: PropTypes.string
 };
-var getPercent = function getPercent(time, duration) {
-  var percent = time / duration;
-  return percent >= 1 ? 1 : percent;
-};
-
-// Shows play progress
-function MarkProgressBar(_ref) {
-  var markedTimes = _ref.markedTimes,
-    duration = _ref.duration,
-    className = _ref.className;
-  if (Array.isArray(markedTimes) && markedTimes.length > 0) {
-    return /*#__PURE__*/ React.createElement(
-      'div',
-      {
-        className: classNames(
-          'video-react-play-progress-mark-container',
-          className
-        )
-      },
-      markedTimes.map(function(time) {
-        return /*#__PURE__*/ React.createElement('span', {
-          className: 'video-react-play-progress-mark-container',
-          'data-time': time,
-          'data-percent': getPercent(time, duration),
-          style: {
-            left: getPercent(time, duration) * 100 + '%'
-          },
-          key: time
-        });
-      })
-    );
-  }
-  return null;
-}
-MarkProgressBar.propTypes = propTypes$9;
 MarkProgressBar.displayName = 'MarkProgressBar';
+var MarkProgressBar$1 = /*#__PURE__*/ React.memo(MarkProgressBar);
 
-var propTypes$a = {
+var propTypes$9 = {
   player: PropTypes.object,
   mouseTime: PropTypes.object,
   actions: PropTypes.object,
@@ -2894,11 +2905,15 @@ var SeekBar = /*#__PURE__*/ (function(_Component) {
   _proto.getEffectiveDuration = function getEffectiveDuration$1() {
     return getEffectiveDuration(this.props);
   };
+  _proto.getRealDuration = function getRealDuration$1() {
+    return getRealDuration(this.props);
+  };
   _proto.getEffectiveTime = function getEffectiveTime$1() {
     return getEffectiveTime(this.props);
   };
   _proto.getPercent = function getPercent() {
     var percent = this.getEffectiveTime() / this.getEffectiveDuration();
+    //  console.log(111111, this.getEffectiveTime(), this.getEffectiveDuration(), percent);
     return percent >= 1 ? 1 : percent;
   };
   _proto.getNewTime = function getNewTime(event) {
@@ -2909,11 +2924,20 @@ var SeekBar = /*#__PURE__*/ (function(_Component) {
     );
   };
   _proto.getMarkedTimes = function getMarkedTimes() {
-    var markedTimes = this.props.player.markedTimes;
-    if (Array.isArray(markedTimes)) {
-      return markedTimes;
-    }
-    return [];
+    return this.props.player.markedTimes || [];
+  };
+  _proto.getMarkedTimesPercentages = function getMarkedTimesPercentages() {
+    var _this2 = this;
+    var t = this.getMarkedTimes()
+      .map(function(time) {
+        return convertToEffectiveTime(time);
+      })
+      .map(function(effectiveTime) {
+        return effectiveTime / _this2.getEffectiveDuration();
+      });
+    //  console.log(222222,this.getMarkedTimes() , t);
+
+    return t;
   };
   _proto.handleMouseDown = function handleMouseDown() {};
   _proto.handleMouseUp = function handleMouseUp(event) {
@@ -2937,7 +2961,7 @@ var SeekBar = /*#__PURE__*/ (function(_Component) {
     actions.replay(5);
   };
   _proto.render = function render() {
-    var _this2 = this;
+    var _this3 = this;
     var _this$props = this.props,
       buffered = _this$props.player.buffered,
       mouseTime = _this$props.mouseTime;
@@ -2948,7 +2972,7 @@ var SeekBar = /*#__PURE__*/ (function(_Component) {
       Slider,
       {
         ref: function ref(input) {
-          _this2.slider = input;
+          _this3.slider = input;
         },
         label: 'video progress bar',
         className: classNames(
@@ -2977,18 +3001,17 @@ var SeekBar = /*#__PURE__*/ (function(_Component) {
         currentTime: time,
         duration: duration
       }),
-      /*#__PURE__*/ React.createElement(MarkProgressBar, {
-        markedTimes: this.getMarkedTimes(),
-        duration: duration
+      /*#__PURE__*/ React.createElement(MarkProgressBar$1, {
+        markedTimesPercentages: this.getMarkedTimesPercentages()
       })
     );
   };
   return SeekBar;
 })(Component);
-SeekBar.propTypes = propTypes$a;
+SeekBar.propTypes = propTypes$9;
 SeekBar.displayName = 'SeekBar';
 
-var propTypes$b = {
+var propTypes$a = {
   player: PropTypes.object,
   className: PropTypes.string
 };
@@ -3052,10 +3075,10 @@ var ProgressControl = /*#__PURE__*/ (function(_Component) {
   };
   return ProgressControl;
 })(Component);
-ProgressControl.propTypes = propTypes$b;
+ProgressControl.propTypes = propTypes$a;
 ProgressControl.displayName = 'ProgressControl';
 
-var propTypes$c = {
+var propTypes$b = {
   actions: PropTypes.object,
   player: PropTypes.object,
   className: PropTypes.string
@@ -3116,10 +3139,10 @@ var PlayToggle = /*#__PURE__*/ (function(_Component) {
   };
   return PlayToggle;
 })(Component);
-PlayToggle.propTypes = propTypes$c;
+PlayToggle.propTypes = propTypes$b;
 PlayToggle.displayName = 'PlayToggle';
 
-var propTypes$d = {
+var propTypes$c = {
   actions: PropTypes.object,
   className: PropTypes.string,
   seconds: PropTypes.number
@@ -3186,7 +3209,7 @@ var ForwardReplayControl = function(mode) {
     };
     return ForwardReplayControl;
   })(Component);
-  ForwardReplayControl.propTypes = propTypes$d;
+  ForwardReplayControl.propTypes = propTypes$c;
   ForwardReplayControl.defaultProps = defaultProps$2;
   return ForwardReplayControl;
 };
@@ -3199,7 +3222,7 @@ ForwardControl.displayName = 'ForwardControl';
 var ReplayControl = ForwardReplayControl('replay');
 ReplayControl.displayName = 'ReplayControl';
 
-var propTypes$e = {
+var propTypes$d = {
   actions: PropTypes.object,
   player: PropTypes.object,
   className: PropTypes.string
@@ -3253,10 +3276,10 @@ var FullscreenToggle = /*#__PURE__*/ (function(_Component) {
   };
   return FullscreenToggle;
 })(Component);
-FullscreenToggle.propTypes = propTypes$e;
+FullscreenToggle.propTypes = propTypes$d;
 FullscreenToggle.displayName = 'FullscreenToggle';
 
-var propTypes$f = {
+var propTypes$e = {
   player: PropTypes.object,
   className: PropTypes.string
 };
@@ -3292,10 +3315,10 @@ function RemainingTimeDisplay(_ref) {
     )
   );
 }
-RemainingTimeDisplay.propTypes = propTypes$f;
+RemainingTimeDisplay.propTypes = propTypes$e;
 RemainingTimeDisplay.displayName = 'RemainingTimeDisplay';
 
-var propTypes$g = {
+var propTypes$f = {
   player: PropTypes.object,
   className: PropTypes.string
 };
@@ -3328,10 +3351,10 @@ function CurrentTimeDisplay(props) {
     )
   );
 }
-CurrentTimeDisplay.propTypes = propTypes$g;
+CurrentTimeDisplay.propTypes = propTypes$f;
 CurrentTimeDisplay.displayName = 'CurrentTimeDisplay';
 
-var propTypes$h = {
+var propTypes$g = {
   player: PropTypes.object,
   className: PropTypes.string
 };
@@ -3363,10 +3386,10 @@ function DurationDisplay(props) {
     )
   );
 }
-DurationDisplay.propTypes = propTypes$h;
+DurationDisplay.propTypes = propTypes$g;
 DurationDisplay.displayName = 'DurationDisplay';
 
-var propTypes$i = {
+var propTypes$h = {
   separator: PropTypes.string,
   className: PropTypes.string
 };
@@ -3390,10 +3413,10 @@ function TimeDivider(_ref) {
     )
   );
 }
-TimeDivider.propTypes = propTypes$i;
+TimeDivider.propTypes = propTypes$h;
 TimeDivider.displayName = 'TimeDivider';
 
-var propTypes$j = {
+var propTypes$i = {
   tagName: PropTypes.string,
   onClick: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
@@ -3465,11 +3488,11 @@ var ClickableComponent = /*#__PURE__*/ (function(_Component) {
   };
   return ClickableComponent;
 })(Component);
-ClickableComponent.propTypes = propTypes$j;
+ClickableComponent.propTypes = propTypes$i;
 ClickableComponent.defaultProps = defaultProps$3;
 ClickableComponent.displayName = 'ClickableComponent';
 
-var propTypes$k = {
+var propTypes$j = {
   player: PropTypes.object,
   children: PropTypes.any
 };
@@ -3505,10 +3528,10 @@ var Popup = /*#__PURE__*/ (function(_Component) {
   };
   return Popup;
 })(Component);
-Popup.propTypes = propTypes$k;
+Popup.propTypes = propTypes$j;
 Popup.displayName = 'Popup';
 
-var propTypes$l = {
+var propTypes$k = {
   inline: PropTypes.bool,
   onClick: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
@@ -3543,11 +3566,11 @@ function PopupButton(props) {
     /*#__PURE__*/ React.createElement(Popup, props)
   );
 }
-PopupButton.propTypes = propTypes$l;
+PopupButton.propTypes = propTypes$k;
 PopupButton.defaultProps = defaultProps$4;
 PopupButton.displayName = 'PopupButton';
 
-var propTypes$m = {
+var propTypes$l = {
   percentage: PropTypes.string,
   vertical: PropTypes.bool,
   className: PropTypes.string
@@ -3577,11 +3600,11 @@ function VolumeLevel(_ref) {
     })
   );
 }
-VolumeLevel.propTypes = propTypes$m;
+VolumeLevel.propTypes = propTypes$l;
 VolumeLevel.defaultProps = defaultProps$5;
 VolumeLevel.displayName = 'VolumeLevel';
 
-var propTypes$n = {
+var propTypes$m = {
   actions: PropTypes.object,
   player: PropTypes.object,
   className: PropTypes.string,
@@ -3708,10 +3731,10 @@ var VolumeBar = /*#__PURE__*/ (function(_Component) {
   };
   return VolumeBar;
 })(Component);
-VolumeBar.propTypes = propTypes$n;
+VolumeBar.propTypes = propTypes$m;
 VolumeBar.displayName = 'VolumeBar';
 
-var propTypes$o = {
+var propTypes$n = {
   player: PropTypes.object,
   actions: PropTypes.object,
   vertical: PropTypes.bool,
@@ -3814,11 +3837,11 @@ var VolumeMenuButton = /*#__PURE__*/ (function(_Component) {
   ]);
   return VolumeMenuButton;
 })(Component);
-VolumeMenuButton.propTypes = propTypes$o;
+VolumeMenuButton.propTypes = propTypes$n;
 VolumeMenuButton.defaultProps = defaultProps$6;
 VolumeMenuButton.displayName = 'VolumeMenuButton';
 
-var propTypes$p = {
+var propTypes$o = {
   children: PropTypes.any
 };
 var Menu = /*#__PURE__*/ (function(_Component) {
@@ -3853,10 +3876,10 @@ var Menu = /*#__PURE__*/ (function(_Component) {
   };
   return Menu;
 })(Component);
-Menu.propTypes = propTypes$p;
+Menu.propTypes = propTypes$o;
 Menu.displayName = 'Menu';
 
-var propTypes$q = {
+var propTypes$p = {
   item: PropTypes.object,
   index: PropTypes.number,
   activateIndex: PropTypes.number,
@@ -3900,10 +3923,10 @@ var MenuItem = /*#__PURE__*/ (function(_Component) {
   };
   return MenuItem;
 })(Component);
-MenuItem.propTypes = propTypes$q;
+MenuItem.propTypes = propTypes$p;
 MenuItem.displayName = 'MenuItem';
 
-var propTypes$r = {
+var propTypes$q = {
   inline: PropTypes.bool,
   items: PropTypes.array,
   className: PropTypes.string,
@@ -4105,10 +4128,10 @@ var MenuButton = /*#__PURE__*/ (function(_Component) {
   };
   return MenuButton;
 })(Component);
-MenuButton.propTypes = propTypes$r;
+MenuButton.propTypes = propTypes$q;
 MenuButton.displayName = 'MenuButton';
 
-var propTypes$s = {
+var propTypes$r = {
   player: PropTypes.object,
   actions: PropTypes.object,
   rates: PropTypes.array,
@@ -4176,12 +4199,12 @@ var PlaybackRateMenuButton = /*#__PURE__*/ (function(_Component) {
   };
   return PlaybackRateMenuButton;
 })(Component);
-PlaybackRateMenuButton.propTypes = propTypes$s;
+PlaybackRateMenuButton.propTypes = propTypes$r;
 PlaybackRateMenuButton.defaultProps = defaultProps$7;
 PlaybackRateMenuButton.displayName = 'PlaybackRateMenuButton';
 
 var _excluded$1 = ['className'];
-var propTypes$t = {
+var propTypes$s = {
   children: PropTypes.any,
   autoHide: PropTypes.bool,
   autoHideTime: PropTypes.number,
@@ -4323,7 +4346,7 @@ var ControlBar = /*#__PURE__*/ (function(_Component) {
   };
   return ControlBar;
 })(Component);
-ControlBar.propTypes = propTypes$t;
+ControlBar.propTypes = propTypes$s;
 ControlBar.defaultProps = defaultProps$8;
 ControlBar.displayName = 'ControlBar';
 
@@ -4351,7 +4374,7 @@ var IS_IPOD = /iPod/i.test(USER_AGENT);
 var IS_IOS = IS_IPHONE || IS_IPAD || IS_IPOD;
 
 var _excluded$2 = ['className', 'children'];
-var propTypes$u = {
+var propTypes$t = {
   children: PropTypes.any,
   width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -4462,6 +4485,7 @@ var Player = /*#__PURE__*/ (function(_Component) {
     }
   };
   _proto.setPlayerProps = function setPlayerProps() {
+    var _this2 = this;
     var _this$props = this.props,
       startTime = _this$props.startTime,
       time = _this$props.time,
@@ -4469,7 +4493,9 @@ var Player = /*#__PURE__*/ (function(_Component) {
       markedTimes = _this$props.markedTimes,
       playbackRate = _this$props.playbackRate;
     if (time !== undefined) {
-      this.seek(time);
+      setTimeout(function() {
+        _this2.seek(time);
+      }, 1000);
     }
     if (startTime !== undefined) {
       this.actions.setStartTime(startTime);
@@ -4487,14 +4513,14 @@ var Player = /*#__PURE__*/ (function(_Component) {
     }
   };
   _proto.getDefaultChildren = function getDefaultChildren(originalChildren) {
-    var _this2 = this;
+    var _this3 = this;
     return [
       /*#__PURE__*/ React.createElement(
         Video,
         {
           ref: function ref(c) {
-            _this2.video = c;
-            _this2.manager.video = _this2.video;
+            _this3.video = c;
+            _this3.manager.video = _this3.video;
           },
           key: 'video',
           order: 0.0
@@ -4691,7 +4717,7 @@ var Player = /*#__PURE__*/ (function(_Component) {
     this.startControlsTimer();
   };
   _proto.startControlsTimer = function startControlsTimer() {
-    var _this3 = this;
+    var _this4 = this;
     var controlBarActiveTime = 3000;
     React.Children.forEach(this.props.children, function(element) {
       if (
@@ -4708,7 +4734,7 @@ var Player = /*#__PURE__*/ (function(_Component) {
     this.actions.userActivate(true);
     clearTimeout(this.controlsHideTimer);
     this.controlsHideTimer = setTimeout(function() {
-      _this3.actions.userActivate(false);
+      _this4.actions.userActivate(false);
     }, controlBarActiveTime);
   };
   _proto.handleStateChange = function handleStateChange(state, prevState) {
@@ -4726,7 +4752,7 @@ var Player = /*#__PURE__*/ (function(_Component) {
     this.actions.activate(false);
   };
   _proto.render = function render() {
-    var _this4 = this;
+    var _this5 = this;
     var fluid = this.props.fluid;
     var _this$manager$getStat2 = this.manager.getState(),
       player = _this$manager$getStat2.player;
@@ -4766,7 +4792,7 @@ var Player = /*#__PURE__*/ (function(_Component) {
         ),
         style: this.getStyle(),
         ref: function ref(c) {
-          _this4.manager.rootElement = c;
+          _this5.manager.rootElement = c;
         },
         role: 'region',
         onTouchStart: this.handleMouseDown,
@@ -4834,7 +4860,7 @@ var Player = /*#__PURE__*/ (function(_Component) {
 Player.contextTypes = {
   store: PropTypes.object
 };
-Player.propTypes = propTypes$u;
+Player.propTypes = propTypes$t;
 Player.defaultProps = defaultProps$9;
 Player.displayName = 'Player';
 
@@ -4857,7 +4883,7 @@ var PlaybackRate = /*#__PURE__*/ (function(_Component) {
 })(Component);
 PlaybackRate.displayName = 'PlaybackRate';
 
-var propTypes$v = {
+var propTypes$u = {
   player: PropTypes.object,
   actions: PropTypes.object,
   className: PropTypes.string,
@@ -5003,7 +5029,7 @@ var ClosedCaptionButton = /*#__PURE__*/ (function(_Component) {
   };
   return ClosedCaptionButton;
 })(Component);
-ClosedCaptionButton.propTypes = propTypes$v;
+ClosedCaptionButton.propTypes = propTypes$u;
 ClosedCaptionButton.defaultProps = defaultProps$a;
 ClosedCaptionButton.displayName = 'ClosedCaptionButton';
 
