@@ -32416,7 +32416,9 @@
         this.hls.loadSource(src);
         this.hls.attachMedia(video);
         this.hls.on(Hls.Events.MANIFEST_PARSED, function() {
-          video.play();
+          if (video.autoplay === true) {
+            video.play();
+          }
         });
       }
     };
